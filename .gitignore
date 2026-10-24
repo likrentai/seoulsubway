@@ -1,0 +1,18 @@
+# never upload the API key
+seoul_api_key.txt
+
+# local environment
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# large data: rebuilt by the notebooks (only data/app is uploaded)
+data/raw/
+data/clean/
+
+# personal notes
+handover_railway_kpi_dashboard.md
+
+# unfinished downloads
+*.tmp
+toupload/
