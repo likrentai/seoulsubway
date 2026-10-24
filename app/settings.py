@@ -83,5 +83,5 @@ ROUTE_EN = {                                                     # <- English na
 # Page 7: about the data
 AUTHOR = "Lik Ren Tai"                                  # <- shown in the credits
 AUTHOR_NOTE = "Built as a hands-on data analytics portfolio project."
-REPO_URL = ""                                                    # <- GitHub repository link (leave empty until it exists)
-CASE_STUDY_URL = ""                                              # <- case study link (leave empty until it exists)
+REPO_URL = "https://github.com/likrentai/seoulsubway"           # <- GitHub repository link
+CASE_STUDY_URL = "https://likrentai.github.io/seoulsubway/case-study.html"   # <- case study link
