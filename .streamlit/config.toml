@@ -1,0 +1,28 @@
+# Streamlit settings for the Seoul subway KPI dashboard.
+# Lines marked # <- are the ones you may want to change. The app reads these colours too (charts and tiles follow them).
+
+[theme]
+base = "dark"
+primaryColor = "#22D3EE"              # <- accent: cyan (buttons, selected items, main chart line)
+backgroundColor = "#0A1428"           # <- page background: deep navy
+secondaryBackgroundColor = "#111E36"  # <- panels, tiles and sidebar
+textColor = "#E3EAF5"                 # <- main text
+borderColor = "#1E3354"               # <- thin borders around panels and inputs
+linkColor = "#22D3EE"                 # <- links
+baseRadius = "0.6rem"                 # <- corner rounding
+showWidgetBorder = true
+font = "'IBM Plex Sans KR':https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"   # <- main font (Latin and Korean)
+headingFont = "'Space Grotesk':https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap"     # <- page titles
+chartCategoricalColors = ["#22D3EE", "#34D399", "#F5B544", "#A78BFA", "#F2685A", "#60A5FA", "#F472B6", "#94A3B8"]  # <- colour order for chart series
+
+[theme.sidebar]
+backgroundColor = "#0D182F"           # <- sidebar background
+
+[client]
+toolbarMode = "viewer"                # hides the developer menu and Deploy button for visitors
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false
