@@ -4,6 +4,8 @@ An interactive KPI dashboard of the Seoul metropolitan subway, built in Python w
 
 **Live app:** https://seoulsubway.streamlit.app
 
+**Case study:** https://likrentai.github.io/seoulsubway/case-study.html (also as a [PDF](https://likrentai.github.io/seoulsubway/case-study.pdf))
+
 ![Overview page of the dashboard](images/overview.png)
 
 ## What the dashboard shows

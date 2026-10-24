@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Back to 98%: ten years of the Seoul subway in open data</title>
+<meta name="description" content="A case study of an interactive KPI dashboard of the Seoul subway, built in Python and Streamlit from real open data: ten years of daily ridership, hourly gate counts, crowding by half hour and Seoul Metro's operating figures.">
+<style>
+/* Fonts are stored next to this page (docs/fonts), both under the SIL Open Font License */
+@font-face { font-family: "Archivo"; src: url("fonts/archivo-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Archivo"; src: url("fonts/archivo-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Source Serif 4"; src: url("fonts/source-serif-4-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Source Serif 4"; src: url("fonts/source-serif-4-latin-400-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Source Serif 4"; src: url("fonts/source-serif-4-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+
+:root {
+  --ink: #1d2433;        /* body text */
+  --muted: #5b6474;      /* captions and notes */
+  --track: #bcd6df;      /* the line of heatmap squares in the margin */
+  --head: #0b5c78;       /* headings: a deep version of the dashboard's cyan */
+  --hot: #c8483b;        /* "very crowded" coral, as on the crowding heatmap */
+  --busy: #b7791f;       /* "busy" amber */
+  --paper: #ffffff;
+  --rule: #dde6ea;
+  --sans: "Archivo", "Segoe UI", Helvetica, Arial, sans-serif;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--serif); font-size: 18px; line-height: 1.65; }
+a { color: var(--head); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+a:focus-visible { outline: 3px solid var(--hot); outline-offset: 2px; border-radius: 2px; }
+
+/* ---------- Opening ---------- */
+.opening { max-width: 1080px; margin: 0 auto; padding: 56px 24px 24px; display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 48px; align-items: start; }
+.opening h1 { font-family: var(--sans); font-weight: 700; font-size: 3.2rem; line-height: 1.05; letter-spacing: -0.02em; margin: 0 0 20px; color: var(--head); }
+.standfirst { font-size: 1.25rem; line-height: 1.5; margin: 0 0 24px; max-width: 34em; }
+.byline { font-family: var(--sans); font-weight: 600; font-size: 0.95rem; color: var(--muted); margin: 0 0 16px; }
+.links { list-style: none; margin: 0; padding: 0; font-family: var(--sans); font-weight: 600; font-size: 0.95rem; }
+.links li { margin: 6px 0; }
+.lead { margin: 0; }
+.lead img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); }
+figcaption { font-size: 0.85rem; line-height: 1.45; color: var(--muted); margin-top: 8px; font-style: italic; }
+
+/* ---------- The line: each section is a cell of the crowding heatmap ---------- */
+.line { max-width: 1080px; margin: 0 auto; padding: 8px 24px 64px; }
+.line-inner { position: relative; padding-left: 64px; max-width: 800px; margin-left: -64px; }   /* the line sits in the margin, so text lines up with the title */
+.line-inner::before { content: ""; position: absolute; left: 14px; top: 18px; bottom: 30px; width: 5px; border-radius: 3px; background: var(--track); }
+section { position: relative; margin-top: 48px; }
+h2 { font-family: var(--sans); font-weight: 700; font-size: 1.6rem; line-height: 1.2; color: var(--head); margin: 0 0 12px; }
+h2::before { /* each section is a square, like a half-hour cell of the crowding heatmap */
+  content: ""; position: absolute; left: -61px; top: 1px; width: 27px; height: 27px; border-radius: 6px;
+  background: var(--paper); border: 4.5px solid var(--head);
+}
+h3 { font-family: var(--sans); font-weight: 600; font-size: 1.15rem; line-height: 1.3; margin: 32px 0 6px; position: relative; color: var(--ink); }
+h3::before { /* a small filled cell for each finding */
+  content: ""; position: absolute; left: -55px; top: 3px; width: 15px; height: 15px; border-radius: 3px; background: var(--head);
+}
+h3.hot::before { background: var(--hot); }
+h3.busy::before { background: var(--busy); }
+p { margin: 0 0 14px; max-width: 40em; }
+.figure-line { font-family: var(--sans); margin: 4px 0 10px; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.figure-line b { font-weight: 700; font-size: 2rem; line-height: 1; color: var(--head); }
+.figure-line.hot b { color: var(--hot); }
+.figure-line.busy b { color: var(--busy); }
+.figure-line span { font-weight: 600; font-size: 0.95rem; color: var(--muted); }
+ul.plain { margin: 0 0 14px; padding-left: 1.1em; max-width: 40em; }
+ul.plain li { margin: 6px 0; }
+.wide { margin: 18px 0 8px; }
+.wide img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); }
+table { border-collapse: collapse; font-family: var(--sans); font-size: 0.92rem; margin: 8px 0 16px; }
+th, td { text-align: left; padding: 6px 18px 6px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); }
+td.num { text-align: right; font-variant-numeric: tabular-nums; padding-right: 0; }
+td.num.hot { color: var(--hot); font-weight: 700; }
+.table-wrap { overflow-x: auto; max-width: 100%; }
+.terminus { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--rule); font-size: 0.9rem; color: var(--muted); }
+
+/* ---------- Narrow screens ---------- */
+@media (max-width: 900px) {
+  .opening { grid-template-columns: 1fr; gap: 28px; padding-top: 32px; }
+  .opening h1 { font-size: 2.4rem; }
+  .lead { max-width: 420px; }
+  .line-inner { margin-left: 0; }
+}
+@media (max-width: 560px) {
+  body { font-size: 17px; }
+  .opening, .line { padding-left: 16px; padding-right: 16px; }
+  .line-inner { padding-left: 36px; }
+  .line-inner::before { left: 6px; width: 4px; }
+  h2::before { left: -39px; width: 20px; height: 20px; border-width: 4px; border-radius: 5px; top: 2px; }
+  h3::before { left: -34px; width: 11px; height: 11px; border-radius: 2px; }
+  table { font-size: 0.85rem; }
+  th, td { padding-right: 10px; }
+}
+
+/* ---------- PDF and printing ---------- */
+@page { size: A4; margin: 16mm 15mm 16mm 15mm; }
+@media print {
+  body { font-size: 10pt; line-height: 1.45; }
+  a { color: var(--ink); text-decoration: none; }
+  .opening { grid-template-columns: minmax(0, 1fr) 62mm; gap: 8mm; padding: 0 0 4mm; max-width: none; }
+  .opening h1 { font-size: 26pt; }
+  .standfirst { font-size: 12.5pt; }
+  .web-link { display: none; }
+  .line { padding: 0; max-width: none; }
+  .line-inner { max-width: none; margin-left: 0; }
+  section { margin-top: 5.5mm; }
+  p, ul.plain li { orphans: 3; widows: 3; }
+  h2 { font-size: 15pt; break-after: avoid; }
+  h3 { font-size: 11.5pt; margin-top: 4mm; break-after: avoid; }
+  .figure-line b { font-size: 17pt; }
+  .wide { break-inside: avoid; }
+  .wide img { max-height: 72mm; width: auto; max-width: 100%; }
+  table { break-inside: avoid; font-size: 8.4pt; margin: 1mm 0 3mm; }
+  table.list { break-inside: auto; }
+  tr { break-inside: avoid; }
+  .figure-line { break-after: avoid; break-inside: avoid; }
+  th, td { padding: 1mm 4mm 1mm 0; }
+  .terminus { margin-top: 4mm; padding-top: 2mm; font-size: 8.5pt; }
+  .links a[href^="http"]::after { content: " (" attr(href) ")"; font-weight: 400; color: var(--muted); }
+}
+</style>
+</head>
+<body>
+
+<header class="opening">
+  <div>
+    <h1>Back to 98%: ten years of the Seoul subway in open data</h1>
+    <p class="standfirst">An interactive KPI dashboard of the Seoul metropolitan subway, built in Python from real open data: daily ridership at every station since 2015, hourly gate counts, crowding by half hour and the trains Seoul Metro runs. How far has ridership come back since COVID-19, where has it grown, and how full are the trains?</p>
+    <p class="byline">Lik Ren Tai, October 2026</p>
+    <ul class="links">
+      <li><a href="https://seoulsubway.streamlit.app">Open the live dashboard</a></li>
+      <li><a href="https://github.com/likrentai/seoulsubway">Code, notebooks and data notes on GitHub</a></li>
+      <li class="web-link"><a href="case-study.pdf">Download this case study as a PDF</a></li>
+    </ul>
+  </div>
+  <figure class="lead">
+    <img src="images/cs_heatmap.jpg" width="1100" height="893" alt="The crowding heatmap for Line 2, outer loop, on weekdays in the second quarter of 2026: stations down the side, half hours across, with a bright patch from Seoul National University of Education to Sadang around 08:00 and a tooltip showing Sadang at 08:30, 145%, about 231 people per car">
+    <figcaption>Line 2, outer loop, on a weekday in 2026 Q2. Each square is how full the trains leaving a station are in one half hour. The hot spot is the morning run from Sadang towards Gangnam: 145%, about 231 people in one car.</figcaption>
+  </figure>
+</header>
+
+<main class="line">
+<div class="line-inner">
+
+<section>
+  <h2>The question</h2>
+  <p>Seoul has one of the busiest metro networks in the world, and it publishes a remarkable amount of open data about it: every tap of a transit card, summed by station and day, back to 2015. COVID-19 cut ridership by more than a quarter in 2020. I wanted to see, with the operator's own numbers, how far it has come back, where the network has grown, when and where the trains are fullest, and how much service is run to carry everyone.</p>
+  <p>The answer is a dashboard of seven pages that anyone can open, with a one-screen KPI overview for any month since 2015 and pages to explore behind each number. Every step, from the raw files to the summaries the app reads, is in Python notebooks that can be rerun.</p>
+</section>
+
+<section>
+  <h2>The data</h2>
+  <div class="table-wrap"><table class="list">
+    <tr><th>What</th><th>Publisher</th><th>Period</th></tr>
+    <tr><td>Boardings and alightings by line, station and day (transit cards), about 2.5 million rows</td><td>Seoul Metropolitan Government</td><td>Jan 2015 to Sep 2026</td></tr>
+    <tr><td>The same data through the Seoul Open API, for the latest months</td><td>Seoul Metropolitan Government</td><td>last 7 months</td></tr>
+    <tr><td>Boardings and alightings by station and hour, Lines 1 to 8</td><td>Seoul Metro</td><td>2024</td></tr>
+    <tr><td>Crowding by station, direction and half hour, Lines 1 to 8</td><td>Seoul Metro</td><td>2023 Q4 to 2026 Q2</td></tr>
+    <tr><td>Train operation by line: length, headways, trips, fleet</td><td>Seoul Metro</td><td>March 2024</td></tr>
+    <tr><td>Official station names in English and other languages</td><td>Seoul Metro</td><td>2026</td></tr>
+  </table></div>
+  <p>The files come from Seoul Open Data Plaza and the Korean Public Data Portal (data.go.kr). Korean public holidays come from the Python package <i>holidays</i>, checked against the data.</p>
+</section>
+
+<section>
+  <h2>Seven pages, one network</h2>
+  <div class="table-wrap"><table class="list">
+    <tr><th>Page</th><th>What it answers</th></tr>
+    <tr><td>Overview</td><td>How is the network doing this month? Seven KPI tiles, two meters and the trend since 2015, for any month</td></tr>
+    <tr><td>Ridership trends</td><td>How has ridership changed, by route and operator, on weekdays and weekends, day by day?</td></tr>
+    <tr><td>Stations</td><td>Which stations are busiest, which gained or lost riders since 2019, and which are new?</td></tr>
+    <tr><td>Time of day</td><td>When does the city travel, and which stations are homes and which are workplaces?</td></tr>
+    <tr><td>Crowding</td><td>Where and when are trains full, and how has the peak changed quarter by quarter?</td></tr>
+    <tr><td>Service</td><td>How many trains run, how hard each line works, and does more service mean less crowding?</td></tr>
+    <tr><td>About the data</td><td>Sources, definitions and every data problem found along the way</td></tr>
+  </table></div>
+  <figure class="wide">
+    <img src="images/cs_pages.jpg" width="2024" height="925" alt="Four views of the dark blue dashboard: the Overview with KPI tiles, a ten-year trend and two meters; the ridership trend since 2015 with the COVID-19 period shaded; a scatter of home and work stations from morning taps; and peak capacity by line next to a bubble chart of trains per hour against crowding">
+    <figcaption>Four of the seven pages: the Overview, Ridership trends, home and work stations on the Time of day page, and capacity against crowding on the Service page.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>What the data shows</h2>
+
+  <h3>Ridership is nearly back</h3>
+  <div class="figure-line"><b>98%</b><span>of September 2019's weekday ridership in September 2026: 8.28 against 8.46 million boardings a day</span></div>
+  <p>Across all days, the network averaged 7.44 million boardings a day in 2019, fell to 5.38 million in 2020 and has climbed back every year since, to 7.13 million in 2026 so far. The dashboard measures recovery on weekdays against the same month in 2019, so that the season and the calendar do not distort the comparison.</p>
+
+  <h3 class="busy">Compare weekdays, not months</h3>
+  <div class="figure-line busy"><b>+2.7% vs &minus;2.2%</b><span>September 2026 against a year earlier: weekdays rose while the all-days average fell</span></div>
+  <p>The difference is Chuseok. The three-day harvest holiday fell in late September in 2026 but in October in 2025, and the subway is almost empty on those days. A monthly average would report a fall that did not happen, so every headline figure uses the average weekday (Monday to Friday without public holidays), with the all-days figure shown beside it.</p>
+
+  <h3>Growth came from new stations</h3>
+  <div class="figure-line"><b>+73</b><span>stations in the card data since January 2015 (548 to 621, counting a transfer station once per line)</span></div>
+  <p>Comparing whole lines makes extended lines look like winners: Line 5 shows +10% against 2019 and Line 8 +9%. Using only the stations open in both periods, they are at +2% and +1%, and most core lines are still below 2019 (Lines 1 and 2 about &minus;8%, Line 4 &minus;7%). The fastest growth is around new business districts and the airport: Magok (+131%), Magoknaru (+95%), Incheon Airport Terminal 2 (+91%) and Seongsu (+67%).</p>
+
+  <h3>The city has homes and workplaces you can read from morning taps</h3>
+  <div class="figure-line"><b>115 and 73</b><span>"home" and "work" stations among Seoul Metro's 274, from who boards and who gets off between 07:00 and 09:00</span></div>
+  <p>At Kkachisan, 90% of morning taps are people boarding; at Jonggak and City Hall, 96% are people arriving. The evening peak at 18:00 is the busiest hour of the weekday (12% of all boardings). Weekends have no morning peak at all: travel builds up to a broad high at 16:00, and a weekend day carries about two thirds of a weekday.</p>
+
+  <h3 class="hot">The worst crowding has eased, and Line 8 is the surprise</h3>
+  <div class="figure-line hot"><b>166% to 145%</b><span>the most crowded weekday train, from 2023 Q4 (Line 4 at Hansung Univ.) to 2026 Q2 (Line 2 at Sadang)</span></div>
+  <p>100% means about 160 people in one car. In 2026 Q2, 338 of 21,411 weekday half-hour slots reached 100% or more. Comparing service with crowding gives the most interesting result:</p>
+  <div class="table-wrap"><table>
+    <tr><th>Line (2024)</th><th style="text-align:right">Trains an hour at the peak</th><th style="text-align:right">Cars</th><th style="text-align:right">Capacity per direction</th><th style="text-align:right">Highest crowding</th></tr>
+    <tr><td>Line 2</td><td class="num">24</td><td class="num">10</td><td class="num">38,400</td><td class="num hot">149%</td></tr>
+    <tr><td>Line 7</td><td class="num">24</td><td class="num">8</td><td class="num">30,720</td><td class="num hot">148%</td></tr>
+    <tr><td>Line 8</td><td class="num">13</td><td class="num">6</td><td class="num">12,800</td><td class="num hot">145%</td></tr>
+    <tr><td>Line 6</td><td class="num">15</td><td class="num">8</td><td class="num">19,200</td><td class="num">114%</td></tr>
+  </table></div>
+  <p>Line 8 carries far fewer people than Line 2, but with short 6-car trains every 4.5 minutes it has a third of Line 2's peak capacity and reaches the same level of crowding. Line 6, with a similar timetable but longer trains and lighter demand, stays the least crowded line.</p>
+</section>
+
+<section>
+  <h2>Problems in the data, and how they were handled</h2>
+  <ul class="plain">
+    <li><b>A broken month in the hourly data.</b> Seoul Metro's hourly file reports the 13:00 hour about ten times too high on every day of April 2024, which made lunchtime look like a third peak. April is left out; without it, the hourly totals match the daily card data to within 0.5%.</li>
+    <li><b>New lines take over taps.</b> When a new line opens at a station (for example the Sillim Line at Boramae or the Seohae Line at Gimpo Airport), the card data books part of the station's passengers to the new line, and the old line seems to lose a third of its riders. Gainers and losers are therefore compared as whole stations whose lines did not change.</li>
+    <li><b>Stations leave and join the data.</b> The Bucheon and Incheon section of Line 7 left the card data between 2022 and 2024, which made Line 7 look 17% down on 2019; like-for-like, it is about 5% down.</li>
+    <li><b>Three layouts for one crowding table.</b> Quarterly files changed their line labels, time labels, sheets and spacing over time, 2024 Q3 was never published, and some rows carried an old station name or the wrong line. All are harmonised, and corrected from Seoul Metro's station codes.</li>
+    <li><b>Messy downloads.</b> Yearly files mix two text encodings, one has two rows glued together, number formats change between years, and stations were renamed (for example Danggogae became Buramsan). Every repair is done in the cleaning notebook, and renames are kept in an editable list.</li>
+    <li><b>An API that forgets.</b> The Seoul Open API only keeps about the last seven months, so the history comes from the published files and the API keeps the latest months up to date.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Limits</h2>
+  <p>Card data counts boardings at the gates, not journeys or people: a passenger who changes lines inside a station is counted once. Hourly counts, crowding and operating figures cover Seoul Metro's Lines 1 to 8 only, and crowding is Seoul Metro's own estimate, averaged over the trains in each half hour. The operating table is a single snapshot from March 2024. English names for stations outside Seoul Metro are romanised automatically and may differ from the signs. The dashboard states these limits on the pages where they matter.</p>
+</section>
+
+<section>
+  <h2>Where this could be useful</h2>
+  <ul class="plain">
+    <li><b>Operators and planners:</b> where longer or more frequent trains would relieve the worst crowding, as Line 8 shows, and how demand is shifting towards new districts.</li>
+    <li><b>City and land-use planning:</b> which neighbourhoods send people out in the morning and which receive them, from public data alone.</li>
+    <li><b>Retail, property and events:</b> station footfall by month and hour, growth since 2019, and the weekend hot spots that concerts and sports create.</li>
+  </ul>
+  <p>The same approach, checked open data, like-for-like comparisons and a one-screen overview with pages behind it, works for any transit system that publishes ridership by station.</p>
+</section>
+
+<section>
+  <h2>About</h2>
+  <p>Lik Ren Tai applies data science in two fields: environmental science and railway systems. This is the third project in the series, after <a href="https://likrentai.github.io/klmobility/case-study.html">a case study of rail use in the Klang Valley</a> and <a href="https://likrentai.github.io/klreach/case-study.html">Klang Valley Reach and Risk</a>, and the first built as an interactive dashboard. Built with Python, pandas, Plotly and Streamlit.</p>
+  <p class="terminus">Data: Seoul Metropolitan Government and Seoul Metro, via Seoul Open Data Plaza and the Korean Public Data Portal (data.go.kr), free to use with credit to the source. Korean public holidays: the holidays package for Python. This is an independent project, not affiliated with or endorsed by Seoul Metro, KORAIL or the Seoul Metropolitan Government.</p>
+</section>
+
+</div>
+</main>
+</body>
+</html>
