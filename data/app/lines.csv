@@ -1,0 +1,28 @@
+﻿line_ko,line_en,route,operator_group,line_order
+1호선,Line 1 (Seoul Metro section),Line 1,Seoul Metro,1
+2호선,Line 2,Line 2,Seoul Metro,2
+3호선,Line 3 (Seoul Metro section),Line 3,Seoul Metro,3
+4호선,Line 4 (Seoul Metro section),Line 4,Seoul Metro,4
+5호선,Line 5,Line 5,Seoul Metro,5
+6호선,Line 6,Line 6,Seoul Metro,6
+7호선,Line 7,Line 7,Seoul Metro,7
+8호선,Line 8,Line 8,Seoul Metro,8
+9호선,Line 9 (phase 1),Line 9,Other operators,9
+9호선2~3단계,Line 9 (phases 2 and 3),Line 9,Seoul Metro,10
+경부선,Gyeongbu Line (Line 1),Line 1,KORAIL,11
+경원선,Gyeongwon Line (Line 1),Line 1,KORAIL,12
+경인선,Gyeongin Line (Line 1),Line 1,KORAIL,13
+장항선,Janghang Line (Line 1),Line 1,KORAIL,14
+일산선,Ilsan Line (Line 3),Line 3,KORAIL,15
+과천선,Gwacheon Line (Line 4),Line 4,KORAIL,16
+안산선,Ansan Line (Line 4),Line 4,KORAIL,17
+분당선,Bundang Line,Suin-Bundang,KORAIL,18
+수인선,Suin Line,Suin-Bundang,KORAIL,19
+경의선,Gyeongui Line,Gyeongui-Jungang,KORAIL,20
+중앙선,Jungang Line,Gyeongui-Jungang,KORAIL,21
+경춘선,Gyeongchun Line,Gyeongchun,KORAIL,22
+경강선,Gyeonggang Line,Gyeonggang,KORAIL,23
+공항철도 1호선,AREX (Airport Railroad),AREX,Other operators,24
+서해선,Seohae Line,Seohae,Other operators,25
+신림선,Sillim Line,Sillim,Other operators,26
+우이신설선,Ui-Sinseol Line,Ui-Sinseol,Other operators,27

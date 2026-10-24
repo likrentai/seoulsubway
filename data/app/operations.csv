@@ -1,0 +1,9 @@
+﻿line_ko,section,length_km,stations,end_to_end_min,cars_owned,trainsets,average_speed_kmh,train_km_weekday,headway_peak_min,headway_offpeak_min,trips_weekday,trips_holiday,cars_per_trainset,note
+1호선,서울~청량리,7.8,10.0,18.0,160.0,16.0,26.0,5064.8,3.0,5.0,588.0,535.0,10.0,Seoul Metro section only (Seoul Station to Cheongnyangni); trips include KORAIL through trains
+2호선,성수~성수[성수지선/신정지선],48.8,43.0,90.0,750.0,84.0,32.5,23728.4,2.5,5.5,528.0,422.0,10.0,main loop; Seongsu and Sinjeong branches excluded
+3호선,지축~오금,38.2,34.0,67.5,490.0,49.0,34.0,14236.4,3.0,6.5,407.0,369.0,10.0,trips include KORAIL through trains
+4호선,진접~남태령,45.4,29.0,68.0,520.0,52.0,40.1,16019.6,2.5,5.5,480.0,408.0,10.0,trips include KORAIL through trains
+5호선,방화~하남검단산/마천,59.8,56.0,108.5,696.0,87.0,33.1,20580.7,2.5,6.5,428.0,342.0,8.0,
+6호선,응암순환~신내,36.3,39.0,75.0,312.0,39.0,29.0,10724.4,4.0,8.0,340.0,251.0,8.0,
+7호선,장암~온수,46.9,42.0,87.0,616.0,77.0,32.3,18546.5,2.5,6.0,404.0,328.0,8.0,
+8호선,암사~모란,17.7,18.0,32.5,120.0,20.0,32.7,5193.8,4.5,8.5,292.0,242.0,6.0,
